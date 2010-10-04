@@ -160,8 +160,10 @@ send_req(Url, Headers, Method) ->
 %% If a list is specified for the body it has to be a flat list. The body can also be a fun/0 or a fun/1. <br/>
 %% If fun/0, the connection handling process will repeatdely call the fun until it returns an error or eof. <pre>Fun() = {ok, Data} | eof</pre><br/>
 %% If fun/1, the connection handling process will repeatedly call the fun with the supplied state until it returns an error or eof. <pre>Fun(State) = {ok, Data} | {ok, Data, NewState} | eof</pre>
+%% If a 'chunkify' tagged tuple is given, the request will be sent with a chunked Transfer-Encoding. Each piece of data returned by the data function will be
+%% encoded in a chunk (chunk size header and CRLFs will wrap each piece of data).
 %% @spec send_req(Url, Headers, Method::method(), Body::body()) -> response()
-%% body() = [] | string() | binary() | fun_arity_0() | {fun_arity_1(), initial_state()}
+%% body() = [] | string() | binary() | fun_arity_0() | {fun_arity_1(), initial_state()} | {chunkify, fun_arity_0()} | {chunkify, fun_arity_1(), initial_state()}
 %% initial_state() = term()
 send_req(Url, Headers, Method, Body) ->
     send_req(Url, Headers, Method, Body, []).

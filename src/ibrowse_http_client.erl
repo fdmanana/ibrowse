@@ -91,7 +91,20 @@ stop(Conn_pid) ->
             ok
     end.
 
-send_req(Conn_Pid, Url, Headers, Method, Body, Options, Timeout) ->
+send_req(Conn_Pid, Url, Headers1, Method, Body1, Options, Timeout) ->
+    case Body1 of
+    {chunkify, BodyFun, Acc} ->
+        Headers = lists:keystore("Transfer-Encoding", 1,
+            Headers1, {"Transfer-Encoding", "chunked"}),
+        Body = {chunkify_fun(BodyFun), Acc};
+    {chunkify, BodyFun} ->
+        Headers = lists:keystore("Transfer-Encoding", 1,
+            Headers1, {"Transfer-Encoding", "chunked"}),
+        Body = chunkify_fun(BodyFun);
+    _ ->
+        Headers = Headers1,
+        Body = Body1
+    end,
     gen_server:call(
       Conn_Pid,
       {send_req, {Url, Headers, Method, Body, Options, Timeout}}, Timeout).
@@ -1735,3 +1748,17 @@ trace_request(Req) ->
 
 to_integer(X) when is_list(X)    -> list_to_integer(X); 
 to_integer(X) when is_integer(X) -> X.
+
+chunkify_fun(BodyFun) ->
+    fun(eof_body_fun) ->
+        eof;
+    (Acc) ->
+        case BodyFun(Acc) of
+        eof ->
+            {ok, <<"0\r\n\r\n">>, eof_body_fun};
+        {ok, Data, NewAcc} ->
+            Bin = iolist_to_binary(Data),
+            Chunk = [ibrowse_lib:dec2hex(4, size(Bin)), "\r\n", Bin, "\r\n"],
+            {ok, iolist_to_binary(Chunk), NewAcc}
+        end
+    end.
