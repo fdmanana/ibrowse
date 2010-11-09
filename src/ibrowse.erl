@@ -339,6 +339,14 @@ try_routing_request(Lb_pid, Parsed_url,
                                         Max_pipeline_size,
                                         {SSLOptions, IsSSL}, 
                                         Headers, Method, Body, Options_1, Timeout, Try_count + 1);
+                {error, {'EXIT', {normal, _}}} ->
+                    % worker terminated because the server closed the connection after sending the
+                    % reply for a previous request - not an error
+                    try_routing_request(Lb_pid, Parsed_url,
+                                        Max_sessions,
+                                        Max_pipeline_size,
+                                        {SSLOptions, IsSSL},
+                                        Headers, Method, Body, Options_1, Timeout, Try_count);
                 Res ->
                     Res
             end;
