@@ -166,7 +166,7 @@ status_code(_)   -> unknown_status_code.
 %% @doc Returns a string with the hexadecimal representation of a given decimal.
 %% N = integer() -- the number to represent as hex
 %% @spec dec2hex(N::integer()) -> string()
-dec2hex(N) -> lists:flatten(io_lib:format("~.16B", [N])).
+dec2hex(N) -> integer_to_list(N, 16).
 
 %% @doc Implements the base64 encoding algorithm. The output data type matches in the input data type.
 %% @spec encode_base64(In) -> Out
