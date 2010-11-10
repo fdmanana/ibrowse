@@ -19,7 +19,6 @@
          url_encode/1,
          decode_rfc822_date/1,
          status_code/1,
-         dec2hex/1,
          drv_ue/1,
          drv_ue/2,
          encode_base64/1,
@@ -162,11 +161,6 @@ status_code(505) -> http_version_not_supported;
 status_code(507) -> insufficient_storage;
 status_code(X) when is_list(X) -> status_code(list_to_integer(X));
 status_code(_)   -> unknown_status_code.
-
-%% @doc Returns a string with the hexadecimal representation of a given decimal.
-%% N = integer() -- the number to represent as hex
-%% @spec dec2hex(N::integer()) -> string()
-dec2hex(N) -> integer_to_list(N, 16).
 
 %% @doc Implements the base64 encoding algorithm. The output data type matches in the input data type.
 %% @spec encode_base64(In) -> Out
